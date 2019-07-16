@@ -1,0 +1,2 @@
+qcloudsms_py
+aliyun-python-sdk-core

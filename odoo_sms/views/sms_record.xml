@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sms_verification_record_tree_view" model="ir.ui.view">
+        <field name="name">短信验证码记录</field>
+        <field name="model">sms.verification.record</field>
+        <field name="arch" type="xml">
+            <tree default_order="id desc" editable="top" create="true">
+                <field name="service_id" required="1"/>
+                <field name="user_id" required="1"/>
+                <field name="phone" required="1"/>
+                <field name="code" required="1"/>
+                <field name="send_time" required="1"/>
+                <field name="end_time"/>
+                <field name="timeout"/>
+                <field name="sid"/>
+                <field name="state" required="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="sms_verification_record_action">
+        <field name="name">短信验证码记录</field>
+        <field name="res_model">sms.verification.record</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <record model="ir.ui.view" id="sms_verification_record_search">
+        <field name="model">sms.verification.record</field>
+        <field name="arch" type="xml">
+            <search string="短信验证码记录">
+                <field name="service_id"/>
+                <field name="user_id"/>
+                <field name="phone"/>
+                <field name="code"/>
+                <field name="send_time"/>
+                <field name="end_time"/>
+                <field name="state"/>
+            </search>
+        </field>
+    </record>
+
+    <menuitem id="sms_verification_record_menu" name="验证码记录" parent="odoo_sms.main_menu" sequence="10" action="sms_verification_record_action"/>
+
+</odoo>
