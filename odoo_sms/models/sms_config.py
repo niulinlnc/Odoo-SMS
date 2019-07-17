@@ -61,6 +61,7 @@ class SmsTemplate(models.Model):
     TemplateType = [
         ('login', '登录时发送验证码'),
         ('registered', '注册时发送验证码'),
+        ('change_pwd', '修改密码通知模板'),
         ('close', '关闭'),
     ]
 

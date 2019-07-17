@@ -50,7 +50,7 @@
                 </div>
                 <div class="text-center oe_login_buttons pt-2">
                     <a href="javascript:void(0);" class="btn btn-link btn-sm" id="regain_code" role="button">未收到验证码</a>
-                    <a t-attf-href="/web/sms/register?{{ keep_query() }}" class="btn btn-link btn-sm" role="button">注册新账号</a>
+<!--                    <a t-attf-href="/web/sms/register?{{ keep_query() }}" class="btn btn-link btn-sm" role="button">注册新账号</a>-->
                     <a t-attf-href="/web/login?{{ keep_query() }}" class="btn btn-link btn-sm" role="button">Odoo账号登录</a>
                 </div>
                 <t t-call="web.layout">

@@ -75,12 +75,15 @@ $("#sms_login_but").click(function (event) {
         dataType: "json",
         success: function (data) {
             console.log(data);
-            if (!data.state) {
-                $("#sms_check_info").html(data.msg).show();
+            if (data.state) {
+                window.location.replace(prot + "//" + host + "/web");
+            }
+            else{
+               $("#sms_check_info").html(data.msg).show();
             }
         },
         error: function (err) {
-            $("#sms_check_info").html("服务器内部错误!").show();
+            $("#sms_check_info").html("服务器内部异常!").show();
         }
     });
 
@@ -89,6 +92,7 @@ $("#sms_login_but").click(function (event) {
 // 重发验证码
 $("#regain_code").click(function (event) {
     $("#login_result").hide();
+    $("#sms_check_info").hide();
     let user_phone = $.trim($("#phone").val());
     if (!checkPhoneInfo(user_phone)) {
         $("#sms_check_info").html("非法的手机号码！");

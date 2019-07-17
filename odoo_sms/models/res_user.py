@@ -28,12 +28,8 @@ _logger = logging.getLogger(__name__)
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    @api.model
-    def _get_default_sms_token(self):
-        return base64.b64encode('123456'.encode('utf-8'))
-
     login_phone = fields.Char(string='手机号码', help="用于使用手机验证码登录系统", copy=False)
-    odoo_sms_token = fields.Char(string='SmsToken', default=_get_default_sms_token)
+    odoo_sms_token = fields.Char(string='SmsToken')
 
     @api.constrains('login_phone')
     def constrains_login_phone(self):
@@ -46,3 +42,8 @@ class ResUsers(models.Model):
                 users = self.env['res.users'].sudo().search([('login_phone', '=', res.login_phone)])
                 if len(users) > 1:
                     raise UserError("抱歉！{}手机号码已被'{}'占用,请解除或更换号码!".format(res.login_phone, users[0].name))
+
+    def _set_password(self):
+        for user in self:
+            user.sudo().write({'odoo_sms_token': base64.b64encode(user.password.encode('utf-8'))})
+        super(ResUsers, self)._set_password()
