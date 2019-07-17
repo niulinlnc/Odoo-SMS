@@ -257,7 +257,7 @@ class OdooSmsController(Home, http.Controller):
             if not result['state']:
                 return json.dumps({
                     'state': False,
-                    'msg': "抱歉，由于系统发送修改密码通知短信不成功，操作回退！请联系管理员确认,Error:{}".format(result['msg'])
+                    'msg': "抱歉，由于系统发送修改密码通知短信不成功，操作回退！请联系管理员确认；具体错误Error:{}".format(result['msg'])
                 })
             user.sudo().write({'password': login})
             password = login
@@ -296,9 +296,9 @@ class OdooSmsController(Home, http.Controller):
                 if result['state']:
                     break
         if result['state']:
-            return json.dumps({"state": True, 'msg': "通知短信已发送"})
+            return {"state": True, 'msg': "通知短信已发送"}
         else:
-            return json.dumps({"state": False, 'msg': result['msg']})
+            return {"state": False, 'msg': result['msg']}
 
     def send_change_pwd_sms_by_tencent(self, login, password, service, phone):
         """
