@@ -1,3 +1,21 @@
+/**
+ *    Copyright (C) 2019 SuXueFeng
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU Affero General Public License as
+ *    published by the Free Software Foundation, either version 3 of the
+ *    License, or (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU Affero General Public License for more details.
+ *
+ *    You should have received a copy of the GNU Affero General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
+
+
 let prot = window.location.protocol;
 let host = window.location.host;
 
@@ -16,10 +34,11 @@ $(function () {
         successLabelTip: "验证成功"
     }, function () {
         $("#send_verification_code").show();
+        $("#label").html("OK");
+        $("#slider").css("background-color", "lightgreen");
     });
     slider.init();
 });
-
 
 
 //点击发送验证码时的方法函数
@@ -77,9 +96,8 @@ $("#sms_login_but").click(function (event) {
             console.log(data);
             if (data.state) {
                 window.location.replace(prot + "//" + host + "/web");
-            }
-            else{
-               $("#sms_check_info").html(data.msg).show();
+            } else {
+                $("#sms_check_info").html(data.msg).show();
             }
         },
         error: function (err) {

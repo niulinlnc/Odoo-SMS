@@ -193,15 +193,3 @@
 
     window['SliderUnlock'] = SliderUnlock;
 })(jQuery, window, document);
-
-// $(function () {
-//     console.log("初始化slider...");
-//     var slider = new SliderUnlock("#slider", {
-//         successLabelTip: "欢迎访问业余草网站"
-//     }, function () {
-//         alert("验证成功,即将跳转至业余草首页");
-//         //window.location.href="http://www.xttblog.com"
-//     });
-//     slider.init();
-//     console.log("初始化slider...end");
-// });
