@@ -354,7 +354,6 @@ class OdooSmsController(Home, http.Controller):
             'pwd': password
         }
         param_json = json.dumps(param_data)
-
         com_request.add_query_param('TemplateParam', param_json)
         try:
             cli_response = client.do_action_with_exception(com_request)
