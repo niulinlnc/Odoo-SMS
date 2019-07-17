@@ -31,6 +31,7 @@
     'auto_install': False,
     'data': [
         'security/ir.model.access.csv',
+        'security/odoo_sms.xml',
         'views/menu.xml',
         'views/sms_config.xml',
         'views/sms_templates.xml',
