@@ -19,6 +19,7 @@
 ###################################################################################
 import logging
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -45,11 +46,19 @@ class SmsConfig(models.Model):
 
     @api.multi
     def update_sms_status(self):
+        """
+        开启服务时，要检查模板列表是否满足要求；
+        强制要求为：每个配置项必须包含"发送验证码模板、修改密码通知模板"
+        :return:
+        """
         for res in self:
-            if res.state == 'open':
-                res.write({'state': 'close'})
-            else:
+            if res.state == 'close':
+                for template in res.template_ids:
+                    if template.used_for != 'login' and template.used_for != 'change_pwd':
+                        raise UserError(u"短信模板数量不满足要求\r\n需要配置（'登录时发送验证码'、'修改密码通知模板'）服务模板！")
                 res.write({'state': 'open'})
+            else:
+                res.write({'state': 'close'})
 
 
 class SmsTemplate(models.Model):
