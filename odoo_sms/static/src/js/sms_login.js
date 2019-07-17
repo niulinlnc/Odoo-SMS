@@ -8,7 +8,18 @@ $(function () {
     $("#sms_login_but").hide();
     $("#login_result").hide();
     $("#regain_code").hide();
+    $("#send_verification_code").hide();
+    console.log("初始化");
+
+    // 初始化滑动验证
+    var slider = new SliderUnlock("#slider", {
+        successLabelTip: "验证成功"
+    }, function () {
+        $("#send_verification_code").show();
+    });
+    slider.init();
 });
+
 
 
 //点击发送验证码时的方法函数
@@ -64,7 +75,7 @@ $("#sms_login_but").click(function (event) {
         dataType: "json",
         success: function (data) {
             console.log(data);
-            if(!data.state){
+            if (!data.state) {
                 $("#sms_check_info").html(data.msg).show();
             }
         },
@@ -101,7 +112,6 @@ $("#regain_code").click(function (event) {
         }
     });
 });
-
 
 
 // 检查手机号码

@@ -17,6 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###################################################################################
+import base64
 import logging
 from odoo import api, fields, models
 from odoo.exceptions import UserError
@@ -27,7 +28,12 @@ _logger = logging.getLogger(__name__)
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    @api.model
+    def _get_default_sms_token(self):
+        return base64.b64encode('123456'.encode('utf-8'))
+
     login_phone = fields.Char(string='手机号码', help="用于使用手机验证码登录系统", copy=False)
+    odoo_sms_token = fields.Char(string='SmsToken', default=_get_default_sms_token)
 
     @api.constrains('login_phone')
     def constrains_login_phone(self):
