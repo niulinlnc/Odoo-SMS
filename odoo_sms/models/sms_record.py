@@ -38,7 +38,7 @@ class SmsVerificationRecord(models.Model):
     send_time = fields.Datetime(string=u'发送时间')
     end_time = fields.Datetime(string=u'截至时间')
     timeout = fields.Integer(string='有效时长(分钟)', required=True, default=30)
-    state = fields.Selection(string=u'状态', selection=[('normal', '有效'), ('invalid', '失效'), ], default='normal')
+    state = fields.Selection(string=u'状态', selection=[('normal', '未使用'), ('invalid', '已使用'), ], default='normal')
 
     @api.constrains('code')
     def constrains_sms_code(self):
