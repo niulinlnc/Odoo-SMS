@@ -37,38 +37,7 @@ from odoo.http import request
 _logger = logging.getLogger(__name__)
 
 
-class SMSLogin(OAuthLogin):
-    def list_providers(self):
-        """
-        通过oauth打开SMS入口
-        :param kw:
-        :return:
-        """
-        result = super(SMSLogin, self).list_providers()
-        for provider in result:
-            if 'sms' in provider['auth_endpoint']:
-                provider['auth_link'] = "%s%s" % (request.httprequest.url, provider['auth_endpoint'])
-
-        return result
-
-
 class OdooSmsController(Home, http.Controller):
-
-    @http.route()
-    def web_login(self, *args, **kw):
-        """
-        :param args:
-        :param kw:
-        :return:
-        """
-        ensure_db()
-        if request.httprequest.method == 'GET' and request.session.uid and request.params.get('redirect'):
-            return http.redirect_with_hash(request.params.get('redirect'))
-        services = request.env['sms.service.config'].sudo().search_count([('state', '=', 'open')])
-        response = super(OdooSmsController, self).web_login(*args, **kw)
-        if response.is_qweb:
-            response.qcontext['sms_config_length'] = services
-        return response
 
     @http.route('/web/login/sms', type='http', auth='public', website=True, sitemap=False)
     def web_odoo_sms_login(self, *args, **kw):
@@ -83,7 +52,7 @@ class OdooSmsController(Home, http.Controller):
         if services and len(services) == 1:
             values['code_maxlength'] = services[0].code_length  # 验证码最大长度
         else:
-            values['code_maxlength'] = 6  # 验证码最大长度
+            values['code_maxlength'] = 6  # 验证码默认最大长度
         return request.render('odoo_sms.login_signup', values)
 
     @http.route('/web/odoo/send/sms/by/phone', type='http', auth="none")
@@ -231,48 +200,6 @@ class OdooSmsController(Home, http.Controller):
         records.sudo().write({'state': 'invalid'})
         return self._web_post_login(phone)
 
-    # def _web_post_login(self, phone):
-    #     """
-    #     登录跳转
-    #     :param phone:
-    #     :param redirect:
-    #     :return:
-    #     """
-    #     ensure_db()
-    #     redirect = None
-    #     request.params['login_success'] = False
-    #     if request.httprequest.method == 'GET' and redirect and request.session.uid:
-    #         return http.redirect_with_hash(redirect)
-    #     if not request.uid:
-    #         request.uid = odoo.SUPERUSER_ID
-    #     values = request.params.copy()
-    #     try:
-    #         values['databases'] = http.db_list()
-    #     except odoo.exceptions.AccessDenied:
-    #         values['databases'] = None
-    #     # 验证是否存在系统用户
-    #     user = request.env['res.users'].sudo().search([('login_phone', '=', phone)], limit=1)
-    #     if not user:
-    #         return json.dumps({'state': False, 'msg': "该手机号码未绑定系统用户，请维护！"})
-    #     login = user.login
-    #     if user.odoo_sms_token:
-    #         password = base64.b64decode(user.odoo_sms_token).decode(encoding='utf-8', errors='strict')
-    #     else:
-    #         try:
-    #             user.sudo().write({'password': login})
-    #             password = login
-    #         except Exception as e:
-    #             return json.dumps({'state': False, 'msg': "登录失败，具体原因为;{}".format(str(e))})
-    #     try:
-    #         uid = request.session.authenticate(request.session.db, login, password)
-    #         if uid is not False:
-    #             request.params['login_success'] = True
-    #             return json.dumps({'state': True, 'msg': "登录成功"})
-    #         else:
-    #             return json.dumps({'state': False, 'msg': "登录失败，请稍后重试！"})
-    #     except Exception as e:
-    #         return json.dumps({'state': False, 'msg': "登录失败!原因为：{}".format(str(e))})
-
     def _web_post_login(self, phone):
         """
         验证手机并登陆系统
@@ -282,13 +209,12 @@ class OdooSmsController(Home, http.Controller):
         dbname = request.session.db
         if not http.db_filter([dbname]):
             return BadRequest()
-        provider = 'sms'
         context = {}
         registry = registry_get(dbname)
         with registry.cursor() as cr:
             try:
                 env = api.Environment(cr, SUPERUSER_ID, context)
-                credentials = env['res.users'].sudo().auth_oauth_sms(provider, phone)
+                credentials = env['res.users'].sudo().auth_oauth_sms('sms', phone)
                 cr.commit()
                 url = '/web'
                 uid = request.session.authenticate(*credentials)
