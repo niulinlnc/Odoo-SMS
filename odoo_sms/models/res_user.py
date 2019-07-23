@@ -25,6 +25,7 @@ from odoo.exceptions import UserError, ValidationError
 from qcloudsms_py import SmsSingleSender
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkcore.request import CommonRequest
+from odoo.exceptions import AccessDenied
 
 _logger = logging.getLogger(__name__)
 
@@ -32,33 +33,50 @@ _logger = logging.getLogger(__name__)
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    login_phone = fields.Char(string='手机号码', help="用于使用手机验证码登录系统", copy=False)
-    odoo_sms_token = fields.Char(string='SmsToken')
-
-    @api.constrains('login_phone')
+    @api.constrains('oauth_uid')
     def constrains_login_phone(self):
         """
-        检查手机号码是否被占用
+        检查手机是否重复
         :return:
         """
         for res in self:
-            if res.login_phone:
-                users = self.env['res.users'].sudo().search([('login_phone', '=', res.login_phone)])
+            if res.oauth_uid:
+                users = self.env['res.users'].sudo().search([('oauth_uid', '=', res.oauth_uid)])
                 if len(users) > 1:
-                    raise UserError("抱歉！{}手机号码已被'{}'占用,请解除或更换号码!".format(res.login_phone, users[0].name))
+                    raise UserError("抱歉！{}手机号码（令牌）已被'{}'占用,请解除或更换号码!".format(res.oauth_uid, users[0].name))
 
-    def _set_password(self):
-        """
-        修改密码后，短信通知到用户
-        :return:
-        """
-        for user in self:
-            user.sudo().write({'odoo_sms_token': base64.b64encode(user.password.encode('utf-8'))})
-            if user.login_phone:
-                result = self.send_change_password_sms(user.login, user.password, user.login_phone)
-                if not result['state']:
-                    raise ValidationError("抱歉，系统发送修改密码通知短信不成功,请检查原因；Error:{}".format(result['msg']))
-        super(ResUsers, self)._set_password()
+    @api.model
+    def auth_oauth_sms(self, provide_id, oauth_uid):
+        if provide_id == 'sms':
+            user_ids = self.search([('oauth_uid', '=', oauth_uid)])
+        else:
+            user_ids = self.search([('oauth_provider_id', '=', provide_id), ('oauth_uid', '=', oauth_uid)])
+        _logger.info("user: %s", user_ids)
+        if not user_ids or len(user_ids) > 1:
+            raise AccessDenied()
+        return (self.env.cr.dbname, user_ids[0].login, oauth_uid)
+
+    @api.model
+    def _check_credentials(self, password):
+        try:
+            return super(ResUsers, self)._check_credentials(password)
+        except AccessDenied:
+            res = self.sudo().search([('id', '=', self.env.uid), ('oauth_uid', '=', password)])
+            if not res:
+                raise
+
+    # def _set_password(self):
+    #     """
+    #     修改密码后，短信通知到用户
+    #     :return:
+    #     """
+    #     for user in self:
+    #         user.sudo().write({'odoo_sms_token': base64.b64encode(user.password.encode('utf-8'))})
+    #         if user.login_phone:
+    #             result = self.send_change_password_sms(user.login, user.password, user.login_phone)
+    #             if not result['state']:
+    #                 raise ValidationError("抱歉，系统发送修改密码通知短信不成功,请检查原因；Error:{}".format(result['msg']))
+    #     super(ResUsers, self)._set_password()
 
     def send_change_password_sms(self, login, password, phone):
         """
