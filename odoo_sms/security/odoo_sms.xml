@@ -21,7 +21,7 @@
 
 		<record id="sms_manage_groups" model="res.groups">
 			<field name="name">管理员</field>
-			<field name="category_id" ref="odoo_sms_groups"/>
+			<field name="category_id" ref="odoo_sms.odoo_sms_groups"/>
 		</record>
 
 	</data>
